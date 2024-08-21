@@ -1,12 +1,3 @@
-terraform {
-  required_providers {
-    yandex = {
-      source = "yandex-cloud/yandex"
-    }
-  }
-  required_version = ">= 0.13"
-}
-
 # Infrastructure for Managed Service for OpenSearch cluster, Managed Service for Greenplum cluster, and Data Transfer.
 
 # RU: https://cloud.yandex.ru/ru/docs/data-transfer/tutorials/opensearch-to-greenplum

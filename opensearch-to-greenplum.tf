@@ -1,3 +1,4 @@
+
 # Infrastructure for Managed Service for OpenSearch cluster, Managed Service for Greenplum cluster, and Data Transfer.
 
 # RU: https://cloud.yandex.ru/ru/docs/data-transfer/tutorials/opensearch-to-greenplum
@@ -5,34 +6,45 @@
 
 # Specify the following settings:
 locals {
+  # The following settings are to be specified by the user. Change them as you wish.
+
   # Settings for the Managed Service for OpenSearch cluster:
-  source_admin_password = "password" # Password of user in Managed Service for OpenSearch
+  source_admin_password = "" # Password of user in Managed Service for OpenSearch
+  mos_cluster_name      = "" # Name of the Managed Service for OpenSearch cluster
 
   # Settings for the Managed Service for Greenplum cluster:  
-  mgp_username      = "user1"    # Name of the Managed Service for Greenplum user
-  mgp_user_password = "password" # Password of the Managed Service for Greenplum user
+  mgp_cluster_name  = "" # Name of the Managed Service for Greenplum cluster
+  mgp_username      = "" # Name of the Managed Service for Greenplum user
+  mgp_user_password = "" # Password of the Managed Service for Greenplum user
+
+  # Settings for the Data Transfer
+  transfer_name = "" # Name of the Data Transfer
+
+  # Setting for the YC CLI that allows running CLI command to activate cluster
+  profile_name = "" # Name of the YC CLI profile
 
   # Specify these settings ONLY AFTER the clusters are created. Then run "terraform apply" command again.
   # You should set up endpoints using the GUI to obtain their IDs
-  source_endpoint_id = "dteukgt2n79nebllhfa8" # Source endpoint ID
-  target_endpoint_id = "dtebmksdaq4bb5co6jid" # Target endpoint ID
-  transfer_enabled   = 1                      # Set to 1 to enable creation of target endpoint and transfer
-
-  # Setting for the YC CLI that allows running CLI command to activate cluster
-  profile_name = "default" # Name of the YC CLI profile
+  source_endpoint_id = "" # Source endpoint ID
+  target_endpoint_id = "" # Target endpoint ID
+  transfer_enabled   = 0  # Set to 1 to enable creation of data transfer.
 
   # The following settings are predefined. Change them only if necessary.
-  opensearch_port  = 9200                  # Managed Service for OpenSearch port for Internet connection  
-  network_name     = "mynet2"              # Name of the network for Managed Service for OpenSearch cluster and Managed Service for Greenplum cluster
-  subnet_name      = "mysubnet2"           # Name of the subnet for Managed Service for OpenSearch cluster and Managed Service for Greenplum cluster
-  sg_name          = "mos-mgp-sg"          # Name of the security group for Managed Service for OpenSearch cluster and Managed Service for Greenplum cluster
-  mos_cluster_name = "mos-cluster3849"     # Name of the Managed Service for OpenSearch cluster
-  mos_version      = "2.8"                 # Version of the Managed Service for OpenSearch cluster   
-  node_group_name  = "mos-group"           # Node group name in the Managed Service for OpenSearch cluster
-  dashboards_name  = "dashboards"          # Name of the dashboards node group in the Managed Service for OpenSearch cluster
-  mgp_cluster_name = "greenplum_cluster"   # Name of the Managed Service for Greenplum cluster
-  mgp_version      = "6.25"                # Version of the Managed Service for Greenplum cluster      
-  transfer_name    = "mos-to-mgp-transfer" # Name of the Data Transfer
+
+  # Network and Safety Group settings:
+  network_name    = "mynet"      # Name of the network for Managed Service for OpenSearch cluster and Managed Service for Greenplum cluster
+  subnet_name     = "mysubnet"   # Name of the subnet for Managed Service for OpenSearch cluster and Managed Service for Greenplum cluster
+  sg_name         = "mos-mgp-sg" # Name of the security group for Managed Service for OpenSearch cluster and Managed Service for Greenplum cluster 
+  opensearch_port = 9200         # Managed Service for OpenSearch port for Internet connection  
+  dashboards_port = 443          # Managed Service for OpenSearch port for connection to Dashboards
+
+  # Settings for the Managed Service for OpenSearch cluster:
+  mos_version     = "2.12"       # Version of the Managed Service for OpenSearch cluster   
+  node_group_name = "mos-group"  # Node group name in the Managed Service for OpenSearch cluster
+  dashboards_name = "dashboards" # Name of the dashboards node group in the Managed Service for OpenSearch cluster  
+
+  # Settings for the Managed Service for Greenplum cluster:  
+  mgp_version = "6.25" # Version of the Managed Service for Greenplum cluster     
 }
 
 resource "yandex_vpc_network" "mynet" {
@@ -57,6 +69,13 @@ resource "yandex_vpc_security_group" "mos-mgp-sg" {
     description    = "Allow connections to the Managed Service for OpenSearch cluster from the Internet"
     protocol       = "TCP"
     port           = local.opensearch_port
+    v4_cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  ingress {
+    description    = "Allow connections to the Managed Service for OpenSearch cluster Dashboards from the Internet"
+    protocol       = "TCP"
+    port           = local.dashboards_port
     v4_cidr_blocks = ["0.0.0.0/0"]
   }
 
@@ -137,6 +156,10 @@ resource "yandex_mdb_greenplum_cluster" "gp_cluster" {
   master_host_count  = 2
   segment_host_count = 2
   segment_in_host    = 2
+
+  access {
+    data_transfer = true
+  }
 
   master_subcluster {
     resources {

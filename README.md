@@ -1,3 +1,3 @@
-# Копирование данных из {{ mos-name }} в {{ mgp-name }} с помощью {{ data-transfer-full-name }}
+# Копирование данных из Managed Service for OpenSearch в Managed Service for Greenplum® с помощью Yandex Data Transfer
 
 С помощью сервиса [Data Transfer](https://cloud.yandex.ru/ru/docs/data-transfer) вы можете скопировать данные из индекса [Managed Service for OpenSearch](https://cloud.yandex.ru/ru/docs/managed-opensearch) в базу данных [Managed Service for Greenplum](https://cloud.yandex.ru/ru/docs/managed-greenplum). Настройка через Terraform описана в [практическом руководстве](https://cloud.yandex.ru/docs/data-transfer/tutorials/opensearch-to-greenplum), необходимый для настройки конфигурационный файл [opensearch-to-greenplum.tf](opensearch-to-greenplum.tf) расположен в этом репозитории.
